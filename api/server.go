@@ -80,14 +80,12 @@ func (s *Server) deleteShoppingItem() http.HandlerFunc {
 			return
 		}
 
-		for i, item := range s.shoppingItems {
-			if item.ID == id {
-				s.shoppingItems = append(s.shoppingItems[:i], s.shoppingItems[i+1:]...)
-				return
-			}
+		index, err := s.inDatabase(id)
+		if err != nil {
+			http.Error(w, "no id matched", http.StatusBadRequest)
+			return
 		}
-
-		http.Error(w, "No id matched", http.StatusBadRequest)
+		s.shoppingItems = append(s.shoppingItems[:index], s.shoppingItems[index+1:]...)
 	}
 }
 
@@ -120,5 +118,5 @@ func (s *Server) inDatabase(id uuid.UUID) (int, error) {
 			return i, nil
 		}
 	}
-	return -1, errors.New("No id matched")
+	return -1, errors.New("no id matched")
 }
